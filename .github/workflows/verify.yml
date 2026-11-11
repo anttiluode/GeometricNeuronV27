@@ -1,0 +1,20 @@
+name: Verify v27
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r requirements.txt
+      - name: Python tests (same machine as round ten, ring memory, erase, cable)
+        run: python -m unittest discover -s tests -v
+      - name: Browser simulator matches the Python tick for tick
+        run: |
+          node --check v27.js
+          node tests/js_parity.cjs

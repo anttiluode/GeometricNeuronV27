@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Geometric Neuron v27: a ring that remembers</title>
+<style>
+:root{--bg:#f6f4ee;--card:#fffdf8;--ink:#1d2428;--dim:#5d696f;--line:#d9d3c4;--on:#d9541e;--rest:#c9c2b0;--cool:#2b7a8c;--ok:#2f7d4f;--bad:#b3261e}
+@media (prefers-color-scheme:dark){:root{--bg:#12171a;--card:#1a2125;--ink:#e8eef0;--dim:#93a1a8;--line:#2e383d;--on:#ff8a4c;--rest:#39454b;--cool:#5cc4d8;--ok:#6fcf97;--bad:#ff7b72}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:980px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:1.7rem;margin:.2em 0}h2{font-size:1.2rem;margin:0 0 .4em}
+p{margin:.5em 0}.dim{color:var(--dim)}small{color:var(--dim)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:18px 0}
+.row{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin:10px 0}
+label{font-size:.9rem;color:var(--dim);display:flex;gap:6px;align-items:center}
+button,select{font:inherit;padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+button:hover{border-color:var(--cool)}
+input[type=range]{width:130px}
+canvas{width:100%;display:block;border-radius:8px;touch-action:manipulation}
+.stat{font-variant-numeric:tabular-nums;font-size:.92rem}
+.stat b{color:var(--cool)}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}
+th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.scroll{overflow-x:auto}
+a{color:var(--cool)}
+code{font-size:.9em}
+</style>
+</head>
+<body>
+<main>
+<p class="dim">Geometric Neuron v27 · Fable 5.2, with Sol's cable proposal and Argon's two checks · <a href="https://github.com/anttiluode/GeometricNeuronV27">repository</a> · <a href="FACTS.md">FACTS.md</a></p>
+<h1>A ring that remembers</h1>
+<p>Every dot below is the original 2025 Perception Lab loop with its Constant Signal set to 1.6, which makes it a silent relay. Each unit's two beat wires go to the next unit's <code>setpoint_mod</code>. Nothing else is added except that a wire can have a length. Tap a rhythm in and the ring keeps it.</p>
+
+<section class="card">
+<h2>1 · Ring memory</h2>
+<canvas id="ringC" height="250"></canvas>
+<canvas id="stripC" height="64" title="click a slot to write or erase that bit"></canvas>
+<div class="row">
+  <button id="tap">Tap (write a beat now)</button>
+  <button id="rnd">Random pattern</button>
+  <button id="wipe">Erase all</button>
+  <button id="pause">Pause</button>
+</div>
+<div class="row">
+  <label>Units <select id="nU"><option>1</option><option>2</option><option>4</option><option selected>8</option><option>16</option></select></label>
+  <label>Cable length per wire <input id="len" type="range" min="0" max="60" value="0"><span id="lenV">0</span></label>
+  <label>Wire weight <input id="wgt" type="range" min="-7" max="-4.5" step="0.05" value="-6"><span id="wgtV">-6.00</span></label>
+  <label>Wire noise <input id="noi" type="range" min="0" max="0.3" step="0.01" value="0"><span id="noiV">0.00</span></label>
+  <label>Clock unit <select id="clk"><option value="0">none</option><option value="6">gates the ring (+6)</option><option value="-6">writes into the ring (−6)</option></select></label>
+  <label>Speed <input id="spd" type="range" min="1" max="40" value="4"></label>
+</div>
+<p class="stat" id="ringS"></p>
+<p><small>The strip is one lap of the ring as seen at unit 0: one cell per tick. Click a cell to write or erase that single bit. "Erase all" raises unit 0's setpoint for one lap. Try weight −5.5 (the hole), a little noise, or one unit with cable length 55 and the clock gating it (lap 59 matches the clock's 59 ticks).</small></p>
+</section>
+
+<section class="card">
+<h2>2 · Distance picks the listener</h2>
+<canvas id="distC" height="150"></canvas>
+<div class="row">
+  <label>Sender weight <input id="dw" type="range" min="-100" max="-5" step="1" value="-24"><span id="dwV">-24</span></label>
+  <label>Length constant <input id="dl" type="range" min="4" max="30" step="1" value="10"><span id="dlV">10</span></label>
+</div>
+<p class="stat" id="distS"></p>
+<p><small>One sender beats once. Forty-one receivers sit at cable lengths 0 to 40, and the signal weakens as exp(−length / length constant). A receiver beats only if what arrives lands in the narrow band a relay responds to, so a strong sender skips its near neighbours.</small></p>
+</section>
+
+<section class="card">
+<h2>What was measured</h2>
+<div class="scroll"><table>
+<tr><th>Question</th><th>Result</th></tr>
+<tr><td>Does a ring keep a pattern?</td><td>Rings of 4, 8 and 16 relays kept 40 of 40 random patterns of 4 bits per unit, unchanged for 1,000 laps (weight −6, no noise).</td></tr>
+<tr><td>Is one unit enough?</td><td>One relay with one cable back to itself kept 20 of 20 random patterns at every cable length tried, up to 256 slots.</td></tr>
+<tr><td>Limit on the pattern</td><td>A run of 1s up to 48 ticks is kept exactly. Runs of 49 and 50 are not: the unit's 50-tick variance memory falls below 0.1 and it stops being a relay.</td></tr>
+<tr><td>Erase (Argon's check)</td><td>The 8-tick rhythm on <code>signal_in</code> at amplitudes 0.2 to 1.0 erased nothing in 12 of 12 rings. Raising one unit's setpoint by +12 for one lap erased everything; for one tick it removed exactly one bit, 12 of 12.</td></tr>
+<tr><td>Weight band</td><td>Exact from −4.9 to −6.55, with holes at −5.25 to −5.65 and −5.9. The hole is square size 0: a blank checkerboard sends nothing.</td></tr>
+<tr><td>Noise</td><td>Fragile. The wire signal is about 12 units. With noise of 0.05 all 8 rings survived 300 laps at weights −6.05 to −6.4; at 0.1 only at −6.15; at 0.2 at none.</td></tr>
+<tr><td>Clock (Argon's check)</td><td>A 59-tick clock gating a 32-tick ring empties it within 100 laps. Gating a 59-tick or 118-tick loop removes only a few slots and the rest stays for 600 laps.</td></tr>
+<tr><td>Two-way runaway</td><td>Not solved. A unit's own beat fed back on a 4-tick cable cuts a two-way chain from about 408 beats per unit to 1 or 2, at one weight and one length only.</td></tr>
+</table></div>
+<p><small>All numbers come from <code>experiments/v27.py</code> and are stored in <code>results/v27.json</code>. The browser simulator matches the Python tick for tick on six test cases.</small></p>
+</section>
+</main>
+<script src="taps.js"></script>
+<script src="v27.js"></script>
+<script>
+(function(){
+const {Net,ringEdges,RELAY,CLOCK}=GN27;
+const $=id=>document.getElementById(id);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function fit(c){const r=devicePixelRatio||1,w=c.clientWidth,h=+c.getAttribute('height');c.width=w*r;c.height=h*r;const x=c.getContext('2d');x.setTransform(r,0,0,r,0,0);return [x,w,h];}
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+
+// ---------- panel 1 ----------
+let net,N,L,lap,strip,pend,wipeLeft=0,paused=false,same=0,lastLap=null,clockW=0,clockOn=false,lit;
+function build(){
+  N=+$('nU').value;L=+$('len').value;clockW=+$('clk').value;const w=+$('wgt').value;
+  const consts=Array(N).fill(RELAY),edges=ringEdges(N,w,L);
+  if(clockW){consts.push(CLOCK);edges.push([N,0,clockW,0]);}
+  net=new Net(consts,edges,null).settle(1500);
+  lap=N*(4+L);strip=new Uint8Array(lap);pend=new Int8Array(lap);same=0;lastLap=null;wipeLeft=0;lit=new Float64Array(net.n);
+}
+function tick(){
+  const sp=new Float64Array(net.n),sig=+$('noi').value;
+  if(sig)for(let i=0;i<N;i++)sp[i]=sig*gauss();
+  const s=(net.t+4)%lap;
+  if(pend[s]){sp[0]+=pend[s]>0?-10:12;pend[s]=0;}
+  if(wipeLeft>0){sp[0]+=12;wipeLeft--;}
+  const own=net.step(null,sp);
+  const k=(net.t-1)%lap;strip[k]=own[0]>3?1:0;
+  for(let i=0;i<net.n;i++)lit[i]=own[i]>3?1:lit[i]*0.45;
+  if(k===lap-1){const cur=strip.join('');same=cur===lastLap?same+1:0;lastLap=cur;}
+}
+function drawRing(){
+  const [x,w,h]=fit($('ringC'));x.clearRect(0,0,w,h);
+  const cx=w/2,cy=h/2,R=Math.min(w,h)/2-28,on=css('--on'),rest=css('--rest'),ink=css('--dim');
+  x.strokeStyle=css('--line');x.lineWidth=L?3:1.5;x.setLineDash(L?[2,4]:[]);
+  if(N>1){x.beginPath();x.arc(cx,cy,R,0,7);x.stroke();}else{x.beginPath();x.arc(cx+R*0.55,cy,R*0.55,0,7);x.stroke();}
+  x.setLineDash([]);
+  for(let i=0;i<N;i++){
+    const a=-Math.PI/2+i*2*Math.PI/N,px=N>1?cx+R*Math.cos(a):cx,py=N>1?cy+R*Math.sin(a):cy,r=N>8?9:13;
+    x.beginPath();x.arc(px,py,r+6*lit[i],0,7);x.fillStyle=lit[i]>0.05?on:rest;x.globalAlpha=lit[i]>0.05?0.35+0.65*lit[i]:1;x.fill();x.globalAlpha=1;
+    x.fillStyle=ink;x.font='11px system-ui';x.textAlign='center';x.fillText(i,px,py+r+16);
+  }
+  if(clockW){const px=cx,py=N>1?cy:cy-R*0.8;x.beginPath();x.arc(px,py,12+6*lit[N],0,7);x.fillStyle=lit[N]>0.05?css('--cool'):rest;x.fill();x.fillStyle=ink;x.fillText('clock',px,py+30);}
+}
+function drawStrip(){
+  const [x,w,h]=fit($('stripC'));x.clearRect(0,0,w,h);
+  const rows=lap>128?2:1,per=Math.ceil(lap/rows),cw=w/per,ch=(h-8)/rows,cur=(net.t-1)%lap;
+  for(let k=0;k<lap;k++){
+    const r=Math.floor(k/per),c=k%per;
+    x.fillStyle=pend[k]>0?css('--cool'):pend[k]<0?css('--bad'):strip[k]?css('--on'):css('--rest');
+    x.fillRect(c*cw+0.5,r*ch+4,Math.max(cw-1,1),ch-3);
+    if(k===cur){x.fillStyle=css('--ink');x.fillRect(c*cw,r*ch,Math.max(cw,2),3);}
+  }
+}
+$('stripC').addEventListener('click',e=>{
+  const b=e.currentTarget.getBoundingClientRect(),rows=lap>128?2:1,per=Math.ceil(lap/rows);
+  const k=Math.floor((e.clientY-b.top)/(b.height/rows))*per+Math.floor((e.clientX-b.left)/(b.width/per));
+  if(k>=0&&k<lap)pend[k]=strip[k]?-1:1;
+});
+$('tap').onclick=()=>{pend[(net.t+4)%lap]=1;};
+$('rnd').onclick=()=>{for(let k=0;k<lap;k++)pend[k]=Math.random()<0.35?1:(strip[k]?-1:0);};
+$('wipe').onclick=()=>{wipeLeft=lap;pend.fill(0);};
+$('pause').onclick=e=>{paused=!paused;e.target.textContent=paused?'Run':'Pause';};
+['nU','len','clk'].forEach(id=>$(id).addEventListener('input',()=>{$('lenV').textContent=$('len').value;build();}));
+$('wgt').addEventListener('input',()=>{const w=+$('wgt').value;$('wgtV').textContent=w.toFixed(2);net.setWeights((e,k)=>k<N?w:e[2]);});
+$('noi').addEventListener('input',()=>{$('noiV').textContent=(+$('noi').value).toFixed(2);});
+function frame(){
+  if(!paused)for(let k=0;k<+$('spd').value;k++)tick();
+  drawRing();drawStrip();
+  let bits=0;for(let k=0;k<lap;k++)bits+=strip[k];
+  $('ringS').innerHTML=`Lap <b>${lap}</b> ticks = ${lap} slots · bits held <b>${bits}</b> · pattern unchanged for <b>${same}</b> laps · tick ${net.t-1500}`;
+  requestAnimationFrame(frame);
+}
+
+// ---------- panel 2 ----------
+function distance(){
+  const w0=+$('dw').value,lam=+$('dl').value;$('dwV').textContent=w0;$('dlV').textContent=lam;
+  const n=42,edges=[];for(let k=0;k<41;k++)edges.push([0,1+k,w0,k]);
+  const d=new Net(Array(n).fill(RELAY),edges,lam).settle(1500),fired=new Uint8Array(n);
+  for(let k=0;k<120;k++){const sp=new Float64Array(n);if(k>=5&&k<7)sp[0]=-10;const own=d.step(null,sp);for(let i=0;i<n;i++)if(own[i]>3)fired[i]=1;}
+  const [x,w,h]=fit($('distC'));x.clearRect(0,0,w,h);
+  const x0=46,cw=(w-x0-8)/41,ink=css('--dim');
+  x.fillStyle=fired[0]?css('--cool'):css('--rest');x.beginPath();x.arc(20,40,13,0,7);x.fill();
+  x.fillStyle=ink;x.font='11px system-ui';x.textAlign='center';x.fillText('sender',22,70);
+  const got=[];
+  for(let k=0;k<41;k++){
+    const px=x0+k*cw+cw/2,eff=-w0*Math.exp(-k/lam);
+    x.fillStyle=fired[1+k]?css('--on'):css('--rest');x.beginPath();x.arc(px,40,Math.min(cw/2-1,9),0,7);x.fill();
+    const bar=Math.min(eff,20)/20*60;x.fillStyle=css('--line');x.fillRect(px-cw/2+1,h-8-bar,cw-2,bar);
+    if(k%5===0){x.fillStyle=ink;x.fillText(k,px,70);}
+    if(fired[1+k])got.push(k);
+  }
+  const y=v=>h-8-v/20*60;x.fillStyle=css('--ok');x.globalAlpha=0.25;x.fillRect(x0,y(6.55),w-x0-8,y(4.4)-y(6.55));x.globalAlpha=1;
+  x.fillStyle=ink;x.textAlign='right';x.fillText('bars: arriving strength · green: band where a relay beats',w-10,h-52);
+  $('distS').innerHTML=got.length?`Receivers that beat: cable length <b>${got.join(', ')}</b>`:'No receiver beats.';
+}
+$('dw').addEventListener('input',distance);$('dl').addEventListener('input',distance);
+addEventListener('resize',distance);
+build();distance();frame();
+})();
+</script>
+</body>
+</html>

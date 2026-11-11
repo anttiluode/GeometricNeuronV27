@@ -1,0 +1,162 @@
+# Geometric Neuron v27: a ring that remembers
+
+**Live page:** https://anttiluode.github.io/GeometricNeuronV27/ · **Read first:** [FACTS.md](FACTS.md)
+
+Fable 5.2, on Sol's cable proposal, with two checks from Argon. Follows
+[GeometricNeuronSurfaceListener](https://github.com/anttiluode/GeometricNeuronSurfaceListener)
+(rounds 1 to 10), which follows
+[ReturnToGeometricNeuron](https://github.com/anttiluode/ReturnToGeometricNeuron) and
+[GeometricNeuronOriginReview](https://github.com/anttiluode/GeometricNeuronOriginReview).
+
+## What this is
+
+The unit is the original 2025 Perception Lab loop (`ecg.json`), unchanged. Round ten showed
+that with its Constant Signal at 1.6 it is a silent **relay**: a pulse on `setpoint_mod` makes
+it beat exactly 4 ticks later. v27 adds one thing, from Sol: **a wire has a length**, which
+delays the signal and weakens it as `exp(-length / length constant)`.
+
+Wire relays in a one-way ring and a beat goes round forever. So the ring is a memory: the
+first state in this line of work that persists through the machine's own dynamics, with no
+trigger, no refractory rule and no learning added.
+
+This is a delay-line memory, a 1950s idea, as Argon said. What is specific here is listed
+under "What the unit contributes".
+
+## Results
+
+All from `python experiments/v27.py` (about 6 minutes), stored in `results/v27.json`.
+
+**1. The ring keeps what is written.** One-tick setpoint pulses on one unit write bits; a ring
+of N relays has 4N slots, one per tick of its lap.
+
+| Ring | Slots | Random patterns read back as written | Unchanged after 1,000 laps |
+|---|---|---|---|
+| 1 unit | 4 | 40 of 40 | 34 of 40 |
+| 2 units | 8 | 40 of 40 | 39 of 40 |
+| 4 units | 16 | 40 of 40 | 40 of 40 |
+| 8 units | 32 | 40 of 40 | 40 of 40 |
+| 16 units | 64 | 40 of 40 | 40 of 40 |
+
+Every failure in the two small rings was the all-ones pattern.
+
+**2. One unit and one cable are enough.** A single relay wired back to itself through a cable
+of length L has 4 + L slots.
+
+| Cable length | 0 | 4 | 12 | 28 | 55 | 124 | 252 |
+|---|---|---|---|---|---|---|---|
+| Slots | 4 | 8 | 16 | 32 | 59 | 128 | 256 |
+| Random patterns unchanged after 300 laps (of 20) | 20 | 20 | 20 | 20 | 20 | 20 | 20 |
+
+This is Sol's point that a larger neuron need not have a larger checkerboard. The bits live
+in the cable; the unit regenerates them once per lap.
+
+**3. The limit on a pattern is the 50-tick variance window** (Argon's check, in a different
+form than predicted). A run of 1s up to 48 ticks is kept exactly. Runs of 49 and 50 are
+corrupted. With 50 identical readings the variance falls below 0.1, and the unit leaves
+damping and stops being a relay. This is also why all-ones fails in the small rings.
+
+**4. Erasing** (Argon's check; my plan was wrong).
+
+| Action | Result |
+|---|---|
+| 8-tick rhythm on `signal_in`, amplitude 0.2, 0.5, 1.0, all units, 10 laps | nothing erased, 12 of 12 rings unchanged |
+| Same at amplitude 2.0 / 4.0 | 153 bits → 13 / 160 → 0 |
+| `setpoint_mod` +12 on one unit for one lap | 151 bits → 0 |
+| `setpoint_mod` +12 on one unit for **one tick** | exactly that bit removed, 12 of 12 rings |
+| `setpoint_mod` +3 / +6 / −20 / −40 for one lap | partial: 22 to 30 bits left of about 155 |
+
+The round-two rhythm stops a clock by blocking its amplify phase. Relays never amplify, so it
+does nothing to them, as Argon said. The port that writes a bit also erases one.
+
+**5. Weight band, and the −5.5 hole explained.** A ring of 8 keeps a 32-bit pattern exactly at
+wire weights −4.90 to −5.20, −5.70 to −5.85 and −5.95 to −6.55. It fails from −5.25 to −5.65
+and at −5.90. In the hole the evoked square size is 0, and a checkerboard with squares of
+size 0 is blank: it sends nothing down the wire.
+
+**6. Noise: fragile.** Gaussian noise added to `setpoint_mod` every tick, 8 rings per weight,
+300 laps (2,400 regenerations per bit). The wire signal is about 12 units.
+
+| Noise (standard deviation) | Weights at which all 8 rings were unchanged |
+|---|---|
+| 0.02 | 21 of the 24 exact weights |
+| 0.05 | −5.00, −5.05, −5.75, −6.05 to −6.40 |
+| 0.10 | −6.15 only |
+| 0.20 | none |
+
+The cause is in FACTS.md: the beat wires vary from 1.76 to 2.00 with square size, so a beat
+does not come back at a fixed strength, and the blank board at size 0 sits in the middle of
+the band. The relay regenerates a beat but does not clean it.
+
+**7. Distance picks the listener.** One sender, 41 receivers at cable lengths 0 to 40, length
+constant 10.
+
+| Sender weight | Receivers that beat, by cable length |
+|---|---|
+| −6 | 0, 1, 2, 3 |
+| −12 | 1, and 6 to 10 |
+| −24 | 8, and 13 to 17 |
+| −48 | 20 to 24 |
+| −96 | 27 to 31 |
+
+Excitation is a band, so a strong sender skips its near neighbours. Each doubling of the
+weight moves the ring of listeners out by about 7.
+
+**8. Regeneration along a cable.** Ring of 4 relays, weight −6.5, length constant 20: three
+beats are kept at edge lengths 0 to 5 and 7, half are lost at 6, and all are lost from 8,
+where the arriving weight is −4.36. A relay every 5 ticks of cable keeps this pattern going.
+
+**9. A clock and a ring** (Argon's check).
+
+| Setup | Result |
+|---|---|
+| Clock (constant 1.0, 59 ticks) wired into an 8-ring at −6 | ring fills to 20 of 32 bits and stays there |
+| Clock gating (+6) an 8-ring, lap 32 | 24 bits → 8 after 10 laps → 0 by lap 100 |
+| Clock gating a one-unit loop, lap 64 | 48 → 25 → 0 |
+| Clock gating a one-unit loop, lap 59 | 50 written, 47 left after 600 laps |
+| Clock gating a one-unit loop, lap 118 | 101 written, 95 left after 600 laps |
+
+A slow clock erases every memory whose lap does not fit its period, and removes only a fixed
+window from one that does. That is a rhythm deciding which contents survive, with one wire.
+One odd case: at lap 60, one tick off the clock, the loop is not emptied. A 7-slot gap travels
+round it and most slots behind the gap are refilled with 1s. I did not diagnose this.
+
+**10. Two-way runaway: not solved.** A unit's own beat wires fed back to its own setpoint on a
+4-tick cable arrive exactly when a neighbour's echo does, and can cancel it.
+
+| Two-way chain of 9, middle unit excited once | Beats per unit in 2,000 ticks |
+|---|---|
+| No self-cable | about 408 |
+| Self-cable weight 12, length 4 | 1 or 2 |
+| Weight 6 / 24 | 1 to 6 / 1 to 4 |
+| Weight 4, 8, 16 | 21 to 46 |
+| Weight 12, length 2, 3, 5 or 6 | 157 to 529 |
+
+It works at one weight and one length, it is not monotone, and with a clock at the end of the
+chain the self-cable breaks the clock (10 beats in 100 periods). Sol's warning stands.
+
+## What the unit contributes
+
+- **Regeneration.** A passive cable fades; a relay puts the beat back at full size each pass.
+- **One port writes and erases**, one bit at a time, at a known 4-tick delay.
+- **Band-pass excitation**, which turns attenuation into distance selection.
+- **A built-in limit** from its 50-tick variance memory: no run of 49 identical ticks.
+- **A clock from the same unit** at another constant, which gates by period.
+
+## What is not shown
+
+- **Robustness.** The memory is exact without noise and fails at noise under 1% of the signal.
+- **Two-way wiring.** Still runs away.
+- **Learning.** Every weight, length and constant is set by hand.
+- **Use.** Nothing reads the ring to do anything. No task, no comparison with a standard model.
+- **Passive cable realism.** A wire here delays and scales. A real cable also smears a pulse.
+
+## Files
+
+| File | What |
+|---|---|
+| `gn27.py` | the simulator: round ten's `native.py` plus edge length and attenuation |
+| `experiments/v27.py`, `results/v27.json` | every number above |
+| `v27.js`, `index.html` | the page; same machine as the Python, checked tick for tick |
+| `tests/` | `python -m unittest discover -s tests` and `node tests/js_parity.cjs` |
+| `taps.json`, `taps.js` | the checkerboard samples from the archived Perception Lab nodes |
+| `FACTS.md` | ports, measured numbers and past mistakes for the whole line |

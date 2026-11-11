@@ -1,0 +1,732 @@
+{
+ "band": {
+  "ring": "8 relays, one 32-bit pattern with 11 ones, 300 laps",
+  "weights_tried": [
+   -4.5,
+   -7.0,
+   0.05
+  ],
+  "weights_that_keep_it_exactly": [
+   -4.9,
+   -4.95,
+   -5.0,
+   -5.05,
+   -5.1,
+   -5.15,
+   -5.2,
+   -5.7,
+   -5.75,
+   -5.8,
+   -5.85,
+   -5.95,
+   -6.0,
+   -6.05,
+   -6.1,
+   -6.15,
+   -6.2,
+   -6.25,
+   -6.3,
+   -6.35,
+   -6.4,
+   -6.45,
+   -6.5,
+   -6.55
+  ]
+ },
+ "memory": {
+  "1 units, 4 slots": {
+   "patterns": 40,
+   "read_back_as_written_on_lap_1": 40,
+   "identical_after_1000_laps": 34,
+   "failures_written_then_lap_1000": [
+    [
+     "1111",
+     "0011"
+    ],
+    [
+     "1111",
+     "0011"
+    ],
+    [
+     "1111",
+     "0011"
+    ],
+    [
+     "1111",
+     "0011"
+    ],
+    [
+     "1111",
+     "0011"
+    ],
+    [
+     "1111",
+     "0011"
+    ]
+   ]
+  },
+  "2 units, 8 slots": {
+   "patterns": 40,
+   "read_back_as_written_on_lap_1": 40,
+   "identical_after_1000_laps": 39,
+   "failures_written_then_lap_1000": [
+    [
+     "11111111",
+     "00000001"
+    ]
+   ]
+  },
+  "4 units, 16 slots": {
+   "patterns": 40,
+   "read_back_as_written_on_lap_1": 40,
+   "identical_after_1000_laps": 40,
+   "failures_written_then_lap_1000": []
+  },
+  "8 units, 32 slots": {
+   "patterns": 40,
+   "read_back_as_written_on_lap_1": 40,
+   "identical_after_1000_laps": 40,
+   "failures_written_then_lap_1000": []
+  },
+  "16 units, 64 slots": {
+   "patterns": 40,
+   "read_back_as_written_on_lap_1": 40,
+   "identical_after_1000_laps": 40,
+   "failures_written_then_lap_1000": []
+  }
+ },
+ "runs": {
+  "8": {
+   "ones_after_500_laps": 8,
+   "unchanged": true
+  },
+  "30": {
+   "ones_after_500_laps": 30,
+   "unchanged": true
+  },
+  "40": {
+   "ones_after_500_laps": 40,
+   "unchanged": true
+  },
+  "45": {
+   "ones_after_500_laps": 45,
+   "unchanged": true
+  },
+  "48": {
+   "ones_after_500_laps": 48,
+   "unchanged": true
+  },
+  "49": {
+   "ones_after_500_laps": 50,
+   "unchanged": false
+  },
+  "50": {
+   "ones_after_500_laps": 52,
+   "unchanged": false
+  },
+  "52": {
+   "ones_after_500_laps": 55,
+   "unchanged": true
+  },
+  "60": {
+   "ones_after_500_laps": 57,
+   "unchanged": false
+  },
+  "64": {
+   "ones_after_500_laps": 57,
+   "unchanged": false
+  }
+ },
+ "erase": {
+  "signal_in 8-tick rhythm, amplitude 0.2, all units, 10 laps": {
+   "bits_before": 159,
+   "bits_after": 159,
+   "rings_unchanged_of_12": 12
+  },
+  "signal_in 8-tick rhythm, amplitude 0.5, all units, 10 laps": {
+   "bits_before": 152,
+   "bits_after": 152,
+   "rings_unchanged_of_12": 12
+  },
+  "signal_in 8-tick rhythm, amplitude 1.0, all units, 10 laps": {
+   "bits_before": 140,
+   "bits_after": 140,
+   "rings_unchanged_of_12": 12
+  },
+  "signal_in 8-tick rhythm, amplitude 2.0, all units, 10 laps": {
+   "bits_before": 153,
+   "bits_after": 13,
+   "rings_unchanged_of_12": 0
+  },
+  "signal_in 8-tick rhythm, amplitude 4.0, all units, 10 laps": {
+   "bits_before": 160,
+   "bits_after": 0,
+   "rings_unchanged_of_12": 0
+  },
+  "setpoint_mod +3 on one unit for one lap": {
+   "bits_before": 158,
+   "bits_after": 22
+  },
+  "setpoint_mod +6 on one unit for one lap": {
+   "bits_before": 148,
+   "bits_after": 29
+  },
+  "setpoint_mod +12 on one unit for one lap": {
+   "bits_before": 151,
+   "bits_after": 0
+  },
+  "setpoint_mod -20 on one unit for one lap": {
+   "bits_before": 157,
+   "bits_after": 26
+  },
+  "setpoint_mod -40 on one unit for one lap": {
+   "bits_before": 165,
+   "bits_after": 30
+  },
+  "setpoint_mod +12 for ONE tick: exactly that one bit removed, rings of 12": 12
+ },
+ "loop": {
+  "cable length 0, 4 slots": {
+   "patterns": 20,
+   "read_back_as_written": 20,
+   "identical_after_300_laps": 20
+  },
+  "cable length 4, 8 slots": {
+   "patterns": 20,
+   "read_back_as_written": 20,
+   "identical_after_300_laps": 20
+  },
+  "cable length 12, 16 slots": {
+   "patterns": 20,
+   "read_back_as_written": 20,
+   "identical_after_300_laps": 20
+  },
+  "cable length 28, 32 slots": {
+   "patterns": 20,
+   "read_back_as_written": 20,
+   "identical_after_300_laps": 20
+  },
+  "cable length 55, 59 slots": {
+   "patterns": 20,
+   "read_back_as_written": 20,
+   "identical_after_300_laps": 20
+  },
+  "cable length 124, 128 slots": {
+   "patterns": 20,
+   "read_back_as_written": 20,
+   "identical_after_300_laps": 20
+  },
+  "cable length 252, 256 slots": {
+   "patterns": 20,
+   "read_back_as_written": 20,
+   "identical_after_300_laps": 20
+  }
+ },
+ "noise": {
+  "sigma 0.02": {
+   "rings_of_8_unchanged_after_300_laps_by_weight": {
+    "-4.95": 8,
+    "-5.0": 8,
+    "-5.05": 8,
+    "-5.1": 8,
+    "-5.15": 8,
+    "-5.25": 2,
+    "-5.3": 3,
+    "-5.4": 1,
+    "-5.5": 1,
+    "-5.65": 6,
+    "-5.7": 8,
+    "-5.75": 8,
+    "-5.8": 8,
+    "-5.85": 8,
+    "-5.9": 7,
+    "-5.95": 8,
+    "-6.0": 8,
+    "-6.05": 8,
+    "-6.1": 8,
+    "-6.15": 8,
+    "-6.2": 8,
+    "-6.25": 8,
+    "-6.3": 8,
+    "-6.35": 8,
+    "-6.4": 8,
+    "-6.45": 8,
+    "-6.5": 8,
+    "-6.55": 1,
+    "-6.6": 1
+   },
+   "weights_with_all_8_unchanged": [
+    -4.95,
+    -5.0,
+    -5.05,
+    -5.1,
+    -5.15,
+    -5.7,
+    -5.75,
+    -5.8,
+    -5.85,
+    -5.95,
+    -6.0,
+    -6.05,
+    -6.1,
+    -6.15,
+    -6.2,
+    -6.25,
+    -6.3,
+    -6.35,
+    -6.4,
+    -6.45,
+    -6.5
+   ]
+  },
+  "sigma 0.05": {
+   "rings_of_8_unchanged_after_300_laps_by_weight": {
+    "-5.0": 8,
+    "-5.05": 8,
+    "-5.1": 5,
+    "-5.15": 1,
+    "-5.25": 2,
+    "-5.35": 1,
+    "-5.4": 1,
+    "-5.45": 1,
+    "-5.75": 8,
+    "-6.05": 8,
+    "-6.1": 8,
+    "-6.15": 8,
+    "-6.2": 8,
+    "-6.25": 8,
+    "-6.3": 8,
+    "-6.35": 8,
+    "-6.4": 8,
+    "-6.45": 4
+   },
+   "weights_with_all_8_unchanged": [
+    -5.0,
+    -5.05,
+    -5.75,
+    -6.05,
+    -6.1,
+    -6.15,
+    -6.2,
+    -6.25,
+    -6.3,
+    -6.35,
+    -6.4
+   ]
+  },
+  "sigma 0.1": {
+   "rings_of_8_unchanged_after_300_laps_by_weight": {
+    "-5.3": 1,
+    "-5.4": 5,
+    "-5.45": 3,
+    "-5.5": 1,
+    "-5.55": 1,
+    "-6.1": 4,
+    "-6.15": 8,
+    "-6.2": 7,
+    "-6.25": 4
+   },
+   "weights_with_all_8_unchanged": [
+    -6.15
+   ]
+  },
+  "sigma 0.2": {
+   "rings_of_8_unchanged_after_300_laps_by_weight": {
+    "-5.3": 1,
+    "-5.35": 1
+   },
+   "weights_with_all_8_unchanged": []
+  }
+ },
+ "distance": {
+  "sender weight -6": {
+   "receivers_that_beat_at_cable_length": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "their_effective_weight": [
+    -6.0,
+    -5.43,
+    -4.91,
+    -4.44
+   ]
+  },
+  "sender weight -12": {
+   "receivers_that_beat_at_cable_length": [
+    1,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "their_effective_weight": [
+    -10.86,
+    -6.59,
+    -5.96,
+    -5.39,
+    -4.88,
+    -4.41
+   ]
+  },
+  "sender weight -24": {
+   "receivers_that_beat_at_cable_length": [
+    8,
+    13,
+    14,
+    15,
+    16,
+    17
+   ],
+   "their_effective_weight": [
+    -10.78,
+    -6.54,
+    -5.92,
+    -5.36,
+    -4.85,
+    -4.38
+   ]
+  },
+  "sender weight -48": {
+   "receivers_that_beat_at_cable_length": [
+    20,
+    21,
+    22,
+    23,
+    24
+   ],
+   "their_effective_weight": [
+    -6.5,
+    -5.88,
+    -5.32,
+    -4.81,
+    -4.35
+   ]
+  },
+  "sender weight -96": {
+   "receivers_that_beat_at_cable_length": [
+    27,
+    28,
+    29,
+    30,
+    31
+   ],
+   "their_effective_weight": [
+    -6.45,
+    -5.84,
+    -5.28,
+    -4.78,
+    -4.32
+   ]
+  }
+ },
+ "regen": {
+  "edge length 0": {
+   "effective_weight": -6.5,
+   "beats_at_one_unit_in_the_last_10_laps": 20,
+   "expected_if_kept": 20
+  },
+  "edge length 1": {
+   "effective_weight": -6.18,
+   "beats_at_one_unit_in_the_last_10_laps": 20,
+   "expected_if_kept": 20
+  },
+  "edge length 2": {
+   "effective_weight": -5.88,
+   "beats_at_one_unit_in_the_last_10_laps": 20,
+   "expected_if_kept": 20
+  },
+  "edge length 3": {
+   "effective_weight": -5.59,
+   "beats_at_one_unit_in_the_last_10_laps": 20,
+   "expected_if_kept": 20
+  },
+  "edge length 4": {
+   "effective_weight": -5.32,
+   "beats_at_one_unit_in_the_last_10_laps": 20,
+   "expected_if_kept": 20
+  },
+  "edge length 5": {
+   "effective_weight": -5.06,
+   "beats_at_one_unit_in_the_last_10_laps": 20,
+   "expected_if_kept": 20
+  },
+  "edge length 6": {
+   "effective_weight": -4.82,
+   "beats_at_one_unit_in_the_last_10_laps": 10,
+   "expected_if_kept": 20
+  },
+  "edge length 7": {
+   "effective_weight": -4.58,
+   "beats_at_one_unit_in_the_last_10_laps": 20,
+   "expected_if_kept": 20
+  },
+  "edge length 8": {
+   "effective_weight": -4.36,
+   "beats_at_one_unit_in_the_last_10_laps": 0,
+   "expected_if_kept": 20
+  },
+  "edge length 9": {
+   "effective_weight": -4.14,
+   "beats_at_one_unit_in_the_last_10_laps": 0,
+   "expected_if_kept": 20
+  },
+  "edge length 10": {
+   "effective_weight": -3.94,
+   "beats_at_one_unit_in_the_last_10_laps": 0,
+   "expected_if_kept": 20
+  },
+  "edge length 11": {
+   "effective_weight": -3.75,
+   "beats_at_one_unit_in_the_last_10_laps": 0,
+   "expected_if_kept": 20
+  },
+  "edge length 12": {
+   "effective_weight": -3.57,
+   "beats_at_one_unit_in_the_last_10_laps": 0,
+   "expected_if_kept": 20
+  }
+ },
+ "clock": {
+  "clock_intervals": [
+   59
+  ],
+  "clock writes into an 8-ring, weight -4": {
+   "bits_in_ring_after_laps_1_5_20_100_400": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  "clock writes into an 8-ring, weight -5": {
+   "bits_in_ring_after_laps_1_5_20_100_400": [
+    0,
+    3,
+    5,
+    5,
+    9
+   ]
+  },
+  "clock writes into an 8-ring, weight -6": {
+   "bits_in_ring_after_laps_1_5_20_100_400": [
+    0,
+    4,
+    13,
+    20,
+    20
+   ]
+  },
+  "clock writes into an 8-ring, weight -7": {
+   "bits_in_ring_after_laps_1_5_20_100_400": [
+    0,
+    2,
+    13,
+    7,
+    12
+   ]
+  },
+  "clock writes into an 8-ring, weight -8": {
+   "bits_in_ring_after_laps_1_5_20_100_400": [
+    0,
+    2,
+    8,
+    7,
+    7
+   ]
+  },
+  "clock gates (weight +6) 8-ring, lap 32": {
+   "bits_written": 27,
+   "bits_after_laps_1_10_100_600": [
+    24,
+    8,
+    0,
+    0
+   ]
+  },
+  "clock gates (weight +6) one-unit loop, lap 59": {
+   "bits_written": 50,
+   "bits_after_laps_1_10_100_600": [
+    46,
+    47,
+    47,
+    47
+   ]
+  },
+  "clock gates (weight +6) one-unit loop, lap 118": {
+   "bits_written": 101,
+   "bits_after_laps_1_10_100_600": [
+    94,
+    95,
+    95,
+    95
+   ]
+  },
+  "clock gates (weight +6) one-unit loop, lap 60": {
+   "bits_written": 51,
+   "bits_after_laps_1_10_100_600": [
+    46,
+    46,
+    47,
+    47
+   ]
+  },
+  "clock gates (weight +6) one-unit loop, lap 64": {
+   "bits_written": 54,
+   "bits_after_laps_1_10_100_600": [
+    48,
+    25,
+    0,
+    0
+   ]
+  }
+ },
+ "selfcable": {
+  "two-way chain of 9, middle unit excited once, self-cable weight 0": [
+   407,
+   408,
+   408,
+   409,
+   2,
+   409,
+   408,
+   408,
+   407
+  ],
+  "two-way chain of 9, middle unit excited once, self-cable weight 4": [
+   26,
+   35,
+   46,
+   40,
+   21,
+   40,
+   46,
+   35,
+   26
+  ],
+  "two-way chain of 9, middle unit excited once, self-cable weight 6": [
+   1,
+   2,
+   3,
+   5,
+   6,
+   5,
+   3,
+   2,
+   1
+  ],
+  "two-way chain of 9, middle unit excited once, self-cable weight 8": [
+   28,
+   33,
+   34,
+   30,
+   35,
+   30,
+   34,
+   33,
+   28
+  ],
+  "two-way chain of 9, middle unit excited once, self-cable weight 12": [
+   2,
+   2,
+   1,
+   1,
+   1,
+   1,
+   1,
+   2,
+   2
+  ],
+  "two-way chain of 9, middle unit excited once, self-cable weight 16": [
+   26,
+   23,
+   33,
+   37,
+   33,
+   37,
+   33,
+   23,
+   26
+  ],
+  "two-way chain of 9, middle unit excited once, self-cable weight 24": [
+   4,
+   3,
+   2,
+   1,
+   1,
+   1,
+   2,
+   3,
+   4
+  ],
+  "same, weight 12, self-cable length 2": [
+   218,
+   211,
+   188,
+   178,
+   179,
+   178,
+   188,
+   211,
+   218
+  ],
+  "same, weight 12, self-cable length 3": [
+   491,
+   314,
+   188,
+   254,
+   269,
+   254,
+   188,
+   314,
+   491
+  ],
+  "same, weight 12, self-cable length 5": [
+   529,
+   317,
+   157,
+   283,
+   276,
+   283,
+   157,
+   317,
+   529
+  ],
+  "same, weight 12, self-cable length 6": [
+   296,
+   249,
+   206,
+   192,
+   175,
+   192,
+   206,
+   249,
+   296
+  ],
+  "clock at one end, 100 clock periods, self-cable weight 0": [
+   245,
+   244,
+   487,
+   244,
+   487,
+   244,
+   487,
+   244,
+   243
+  ],
+  "clock at one end, 100 clock periods, self-cable weight 12": [
+   10,
+   6,
+   11,
+   16,
+   21,
+   24,
+   31,
+   34,
+   41
+  ]
+ }
+}
