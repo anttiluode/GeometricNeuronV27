@@ -18,3 +18,4 @@ jobs:
         run: |
           node --check v27.js
           node tests/js_parity.cjs
+          node tests/canvas_resize.cjs
