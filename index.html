@@ -19,6 +19,10 @@ button,select{font:inherit;padding:6px 12px;border-radius:8px;border:1px solid v
 button:hover{border-color:var(--cool)}
 input[type=range]{width:130px}
 canvas{width:100%;display:block;border-radius:8px;touch-action:manipulation}
+/* Keep the display size independent of the high-DPI backing-store dimensions. */
+#ringC{height:250px}
+#stripC{height:64px}
+#distC{height:150px}
 .stat{font-variant-numeric:tabular-nums;font-size:.92rem}
 .stat b{color:var(--cool)}
 table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}
@@ -90,7 +94,18 @@ code{font-size:.9em}
 const {Net,ringEdges,RELAY,CLOCK}=GN27;
 const $=id=>document.getElementById(id);
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-function fit(c){const r=devicePixelRatio||1,w=c.clientWidth,h=+c.getAttribute('height');c.width=w*r;c.height=h*r;const x=c.getContext('2d');x.setTransform(r,0,0,r,0,0);return [x,w,h];}
+function fit(c){
+  // Measure the CSS box, never the canvas height attribute: assigning c.height
+  // changes that attribute and formerly grew the canvas every animation frame.
+  const r=Math.min(window.devicePixelRatio||1,3);
+  const rect=c.getBoundingClientRect(),w=rect.width,h=rect.height;
+  const pxW=Math.max(1,Math.round(w*r)),pxH=Math.max(1,Math.round(h*r));
+  // Avoid clearing and reallocating the backing store every frame.
+  if(c.width!==pxW||c.height!==pxH){c.width=pxW;c.height=pxH;}
+  const x=c.getContext('2d');
+  x.setTransform(r,0,0,r,0,0);
+  return [x,w,h];
+}
 function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
 
 // ---------- panel 1 ----------
