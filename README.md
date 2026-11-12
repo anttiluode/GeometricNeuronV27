@@ -229,8 +229,8 @@ versions) is not built.
 
 ### Z: a shared slow state (Sol's next step)
 
-Run: `python experiments/noble_z.py` (about 35 seconds). Numbers in `results/noble.json` under
-`Z_shared_slow_state`.
+Run: `python experiments/noble_z.py` (about 2 minutes). Numbers in `results/noble.json` under
+`Z_shared_slow_state` and `Z_small_shared_changes`.
 
 **The problem it addresses, from N3.** A self-writing ring with write-back always on erases a slot
 every time the world drops a beat, and replays the glitch for a lap or more. With write-back off it
@@ -256,6 +256,9 @@ world's clean pattern. θ is tuned on seed 0; scores are means over seeds 1 to 5
 | shared Z clamped at its own mean | 0.309 | 1.000 | never / never | 12 |
 | shared Z, own trace replayed 20 laps late | 0.634 | 0.902 | 39 (one seed never) / 15 | 106 |
 | plain counter per channel (gate open if the comparator fired in 2 of the last 2 laps) | 0.894 | 0.965 | 13.0 / 6.8 | 132 |
+| shared Z sets each channel's threshold (0.5 while shared Z > 7, else 2.5) | 0.879 | 0.968 | 15.0 / 5.2 | 133 |
+| **no added Z: each channel's listening relay's own 50-tick variance** (gate open above 0.3) | 0.849 | 0.905 | 9.4 / 5.2 | 126 |
+| no added Z: the four listening relays' variances summed (above 1.3) | 0.805 | 0.860 | 8.6 / 8.2 | 154 |
 
 Per seed, one Z per channel beats the shared Z (or ties it) in 5 of 5 seeds and the counter in 5 of 5.
 
@@ -272,8 +275,36 @@ Per seed, one Z per channel beats the shared Z (or ties it) in 5 of 5 seeds and 
   found for its shared phase: sharing helps when changes are global and hurts when they are local.
 - A leaky per-channel Z is slightly better than a plain counter (0.917 vs 0.894, 5 of 5 seeds).
   That is a small difference between two ordinary controllers, not a property of the geometry.
-- Z is an added leaky integrator. Whether the units' own 50-tick variance could play Z's part was
-  not tested.
+- **The units' own slow state can do Z's job, partly.** A relay that only listens to its channel's
+  comparator has a variance that counts recent beats: 0.14 at rest, about 0.47 with one beat in its
+  50-tick window, about 0.79 with two. Read as Z, with nothing added, it takes memory from 0.73 to
+  0.85 (better than always-on in 5 of 5 seeds). It is worse than the leaky Z because its window is
+  fixed at 50 ticks, about one and a half laps.
+
+**A world built for the shared Z** (`Z_small_shared_changes`). Same setup, but every switch adds or
+removes exactly one beat: at lap 50 every channel changes by one beat, at lap 90 one channel does.
+Per channel that is one error per lap, weak evidence; pooled over four channels it is four. This is
+where I predicted the shared Z would win. Re-tuned on seed 0, means over seeds 1 to 5:
+
+| Gate | Correct | Laps to adapt: all switch / one switch (mean) |
+|---|---|---|
+| always open | 0.727 | 38.6 / 1.6 |
+| closed after lap 20 | 0.291 | never / never |
+| one Z per channel | 0.910 | 12.4 / 5.0 |
+| one shared Z | 0.869 | **21.6** / 8.8 |
+| shared Z clamped | 0.291 | never / never |
+| shared Z replayed 20 laps late | 0.633 | 61.5 / 7.2 |
+| **plain counter per channel** (4 of the last 4 laps) | **0.925** | **8.8** / 4.4 |
+| shared Z sets each channel's threshold | 0.909 | 12.0 / **2.8** |
+| GN variance per channel / pooled | 0.858 / 0.826 | 27.2 / 36.4 |
+
+**The prediction was wrong.** The shared Z is not faster here; it is slower to adapt to the shared
+change (21.6 laps against 12.4) and loses on correctness in 4 of 5 seeds. A shared gate opens
+writing on all four channels at once, including channels whose only surprise is a dropout, which is
+probably what slows it (not diagnosed). The best use of the shared state found was as a boundary
+condition: it lowers each channel's threshold while the whole network is surprised, and the
+channel's own evidence still decides. That tied one-Z-per-channel on correctness (0.909 vs 0.910)
+and adapted fastest to a one-channel change, but did not beat the plain counter.
 
 **Two gates that failed** (kept in the experiment's docstring): a gate relay between comparator and
 ring made the 8 two-beat patterns with gaps of 3 and 5 slots drop a beat every third lap. A held
@@ -282,8 +313,8 @@ shifted times and the ring is lost within a lap.
 
 Not claimed: a new mechanism (gating learning by accumulated surprise is ordinary; it is how many
 adaptive filters and learning-rate schedules work), or that the shared state helps in general. Not
-tested: correlated dropouts, global changes that move only one beat per channel (where pooling
-should help most), and Z built from geometric units.
+tested: correlated dropouts; worlds with more channels or rarer dropouts; a shared state that
+changes anything other than write thresholds.
 
 ## What the unit contributes
 

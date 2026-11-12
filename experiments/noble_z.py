@@ -25,7 +25,10 @@ Z is NOT a geometric unit: it is a leaky count of comparator beats,
 with tau = 3 laps. The units stay unchanged; Z only sets the gates' setpoints.
 
 World schedule (130 laps): every channel learns its pattern; from lap 20 each beat is dropped with
-probability p; at lap 50 ALL channels switch to new patterns; at lap 90 ONE channel switches.
+probability p; at lap 50 ALL channels switch; at lap 90 ONE channel switches.
+  world "big":   the switches go to unrelated patterns
+  world "small": every switch adds or removes exactly ONE beat (weak evidence per channel, shared
+                 across channels: where pooling should help most)
 Score: over laps 20..129, the fraction of (channel, lap) in which the ring holds the world's clean
 pattern (dropouts are not part of the pattern). Also laps to adapt after the two switches.
 
@@ -36,6 +39,12 @@ Conditions:
   shared Z      one Z for all four channels, from all comparators
   shared Z clamped   Z held at its own time-average from the free run
   shared Z replayed  the free run's Z trace, shifted 20 laps (right shape, wrong time)
+  shared Z sets local thresholds   each channel's own Z decides, but its threshold is lo while
+                the shared Z is above theta and hi otherwise (the shared state as a boundary condition
+                on the local decision, Noble's sense of downward causation)
+  GN variance, per channel / pooled   no added Z: a listening relay per channel hears its
+                comparator at -6, and its own 50-tick variance (0.14 at rest, ~0.47 with one beat
+                in the window, ~0.79 with two) is read as Z; pooled = sum of the four
   software      not leaky: gate open while the channel's comparator fired in at least m of the last
                 k laps (a plain counter, the 'matched simple controller'); m, k tuned like theta
 theta (and m, k) are tuned on seed 0 and scored on seeds 1..5.
@@ -66,7 +75,8 @@ def build(nc=C):
     for c in range(nc):
         e += [(idx(c, 1 + k), idx(c, 1 + (k + 1) % 8), W_RING, 0) for k in range(8)]
         e += [(idx(c, 0), idx(c, 9), W_XOR, 0), (idx(c, 1), idx(c, 9), W_XOR, 0), (idx(c, 9), idx(c, 3), W_RING, 0)]
-    return g.settle(g.Net([g.RELAY] * (nc * U), e))
+        e += [(idx(c, 9), nc * U + c, W_RING, 0)]      # a listening relay per channel: its var is GN's own slow state
+    return g.settle(g.Net([g.RELAY] * (nc * U + nc), e))
 
 
 def candidates():
@@ -118,9 +128,24 @@ def patterns(rng):
     return first, second, third
 
 
-def schedule(seed, p=P_DROP):
+def neighbour(pat, rng):
+    """A stable pattern with exactly one beat added or removed."""
+    near = [q for q in stable_patterns() if len(set(q) ^ set(pat)) == 1]
+    return near[rng.integers(len(near))][:]
+
+
+def patterns_small(rng):
+    pool = stable_patterns()
+    first = [pool[rng.integers(len(pool))][:] for _ in range(C)]
+    second = [neighbour(p, rng) for p in first]
+    third = [p[:] for p in second]
+    third[0] = neighbour(second[0], rng)
+    return first, second, third
+
+
+def schedule(seed, p=P_DROP, world="big"):
     rng = np.random.default_rng(seed)
-    first, second, third = patterns(rng)
+    first, second, third = patterns(rng) if world == "big" else patterns_small(rng)
     clean, beats = [], []                 # clean[lap][c] = slots; beats = set of (tick, c)
     for lap in range(LAPS):
         pats = first if lap < SWITCH_ALL else (second if lap < SWITCH_ONE else third)
@@ -133,8 +158,8 @@ def schedule(seed, p=P_DROP):
     return clean, beats
 
 
-def run(seed, mode, theta=None, m=None, k=None, ztrace=None, p=P_DROP):
-    clean, beats = schedule(seed, p)
+def run(seed, mode, theta=None, m=None, k=None, ztrace=None, p=P_DROP, world="big", lo=None, hi=None):
+    clean, beats = schedule(seed, p, world)
     pulses = {}
     for b, c in beats:
         for t in (b - 4, b - 3):
@@ -151,6 +176,9 @@ def run(seed, mode, theta=None, m=None, k=None, ztrace=None, p=P_DROP):
         if mode == "always": gate = np.ones(C, bool)
         elif mode == "hold": gate = np.full(C, lap < 20)
         elif mode == "local": gate = Zl > theta
+        elif mode == "hier": gate = Zl > (lo if Zs > theta else hi)     # shared Z sets each channel's threshold
+        elif mode == "gnvar_local": gate = net.var[C * U:C * U + C] > theta
+        elif mode == "gnvar_shared": gate = np.full(C, net.var[C * U:C * U + C].sum() > theta)
         elif mode == "shared": gate = np.full(C, Zs > theta)
         elif mode == "clamped": gate = np.full(C, ztrace > theta)
         elif mode == "replayed":
@@ -208,44 +236,67 @@ def tune(mode, grid, seed=0):
         s = score(run(seed, mode, **th))
         if best is None or s["correct"] > best[1]["correct"]:
             best = (th, s)
-    return best[0]
+    return best[0]           # includes world=..., so it can be passed straight to run()
 
 
-if __name__ == "__main__":
-    seeds = [1, 2, 3, 4, 5]
-    th_local = tune("local", [{"theta": x} for x in (0.5, 1.5, 2.5, 3.5, 5.0, 7.0)])
-    th_shared = tune("shared", [{"theta": x} for x in (1.5, 2.5, 3.5, 5.0, 7.0, 10.0, 14.0)])
-    th_soft = tune("software", [{"m": m, "k": k} for k in (2, 3, 4) for m in range(2, k + 2)])
-    print("tuned on seed 0:", th_local, th_shared, th_soft, flush=True)
-    res = {"patterns_held_alone_without_dropouts": f"{len(stable_patterns())} of {len(candidates())}",
-           "tuned": {"local": th_local, "shared": th_shared, "software": th_soft}, "p_drop": P_DROP, "seeds": seeds, "per_seed": {}}
-    rows = {}
+def study(world, seeds=(1, 2, 3, 4, 5)):
+    kw = {"world": world}
+    th = {
+        "local": tune("local", [{"theta": x, **kw} for x in (0.5, 1.5, 2.5, 3.5, 5.0, 7.0)]),
+        "shared": tune("shared", [{"theta": x, **kw} for x in (1.5, 2.5, 3.5, 5.0, 7.0, 10.0, 14.0)]),
+        "software": tune("software", [{"m": m, "k": k, **kw} for k in (2, 3, 4) for m in range(2, k + 2)]),
+        "gnvar_local": tune("gnvar_local", [{"theta": x, **kw} for x in (0.3, 0.4, 0.5, 0.6, 0.7, 0.9)]),
+        "gnvar_shared": tune("gnvar_shared", [{"theta": x, **kw} for x in (0.7, 0.9, 1.1, 1.3, 1.6, 2.0, 2.5)]),
+        "hier": tune("hier", [{"theta": t, "lo": a, "hi": b, **kw} for t in (3.5, 5.0, 7.0, 10.0)
+                              for a in (0.5, 1.5) for b in (2.5, 3.5, 5.0)]),
+    }
+    print(world, "tuned on seed 0:", th, flush=True)
+    res = {"tuned": th, "per_seed": {}}
     for sd in seeds:
-        free = run(sd, "shared", **th_shared)
+        free = run(sd, "shared", **th["shared"])
+        gfree = run(sd, "gnvar_shared", **th["gnvar_shared"])
         conds = {
-            "always": run(sd, "always"),
-            "hold": run(sd, "hold"),
-            "local Z": run(sd, "local", **th_local),
+            "always": run(sd, "always", **kw),
+            "hold": run(sd, "hold", **kw),
+            "local Z": run(sd, "local", **th["local"]),
             "shared Z": free,
-            "shared Z clamped": run(sd, "clamped", theta=th_shared["theta"], ztrace=float(free["zs"].mean())),
-            "shared Z replayed (+20 laps)": run(sd, "replayed", theta=th_shared["theta"], ztrace=free["zs"]),
-            "software counter": run(sd, "software", **th_soft),
+            "shared Z clamped": run(sd, "clamped", theta=th["shared"]["theta"], ztrace=float(free["zs"].mean()), **kw),
+            "shared Z replayed (+20 laps)": run(sd, "replayed", theta=th["shared"]["theta"], ztrace=free["zs"], **kw),
+            "software counter": run(sd, "software", **th["software"]),
+            "GN variance, per channel": run(sd, "gnvar_local", **th["gnvar_local"]),
+            "GN variance, pooled": gfree,
+            "shared Z sets local thresholds": run(sd, "hier", **th["hier"]),
         }
         res["per_seed"][sd] = {k: score(v) for k, v in conds.items()}
-        print(sd, {k: (round(v["correct"], 3), v["adapt_all_switch_laps"], v["adapt_one_switch_laps"]) for k, v in res["per_seed"][sd].items()}, flush=True)
+        print(world, sd, {k: round(v["correct"], 3) for k, v in res["per_seed"][sd].items()}, flush=True)
     mean = {}
     for name in res["per_seed"][seeds[0]]:
         vals = [res["per_seed"][s][name] for s in seeds]
+        aa = [v["adapt_all_switch_laps"] for v in vals]
+        ao = [v["adapt_one_switch_laps"] for v in vals]
         mean[name] = {"correct": round(float(np.mean([v["correct"] for v in vals])), 3),
                       "correct_before_switch": round(float(np.mean([v["correct_before_switch"] for v in vals])), 3),
-                      "adapt_all_switch_laps": [v["adapt_all_switch_laps"] for v in vals],
-                      "adapt_one_switch_laps": [v["adapt_one_switch_laps"] for v in vals],
+                      "adapt_all_switch_laps": aa, "adapt_one_switch_laps": ao,
+                      "adapt_all_mean_of_finite": round(float(np.mean([x for x in aa if x is not None])), 1) if any(x is not None for x in aa) else None,
+                      "adapt_one_mean_of_finite": round(float(np.mean([x for x in ao if x is not None])), 1) if any(x is not None for x in ao) else None,
                       "writes": float(np.mean([v["writes"] for v in vals])),
                       "gate_open_frac": round(float(np.mean([v["gate_open_frac"] for v in vals])), 3)}
     res["mean"] = mean
-    for k, v in mean.items():
-        print(f"{k:30s} {v}")
+    return res
+
+
+if __name__ == "__main__":
     out = ROOT / "results" / "noble.json"
     old = json.loads(out.read_text()) if out.exists() else {}
-    old["Z_shared_slow_state"] = res
+    big = study("big")
+    big["patterns_held_alone_without_dropouts"] = f"{len(stable_patterns())} of {len(candidates())}"
+    big["p_drop"] = P_DROP
+    small = study("small")
+    small["p_drop"] = P_DROP
+    old["Z_shared_slow_state"] = big
+    old["Z_small_shared_changes"] = small
     out.write_text(json.dumps(old, indent=1))
+    for name, r in (("BIG (all channels switch to unrelated patterns)", big), ("SMALL (every channel gains or loses one beat)", small)):
+        print("\n" + name)
+        for k, v in r["mean"].items():
+            print(f"  {k:30s} correct {v['correct']:.3f}  before switch {v['correct_before_switch']:.3f}  adapt all {v['adapt_all_switch_laps']} one {v['adapt_one_switch_laps']}  writes {v['writes']:.0f}")

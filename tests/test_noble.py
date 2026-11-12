@@ -72,6 +72,12 @@ class SharedSlowState(unittest.TestCase):
         self.assertGreater(local, hold + 0.3)
         self.assertEqual(clamped, hold)
 
+    def test_listening_relay_variance_works_as_z(self):
+        sd = 1
+        always = nz.score(nz.run(sd, "always"))["correct"]
+        gv = nz.score(nz.run(sd, "gnvar_local", theta=0.3))["correct"]
+        self.assertGreater(gv, always + 0.05)
+
 
 if __name__ == "__main__":
     unittest.main()

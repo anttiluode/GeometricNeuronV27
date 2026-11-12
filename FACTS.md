@@ -95,6 +95,9 @@ files are in GeometricNeuronOriginReview, not here. Check them before claiming a
   the clean pattern in about 76% of laps, and one dropout can cascade for several laps. Gating the
   write wire by a per-channel leaky count of surprise raises it to 98%. [noble] Z
 
+- **A listening relay's variance counts recent beats**: 0.14 at rest, ~0.47 with one beat in the
+  50-tick window, ~0.79 with two, ~1.1 at one beat per 16 ticks, ~1.7 at one per 8. [noble] Z
+
 ## 5. Things that were believed and turned out wrong
 
 | Belief | What happened |
@@ -104,6 +107,7 @@ files are in GeometricNeuronOriginReview, not here. Check them before claiming a
 | At constant 1.45 the unit never leaves damping (Fable, r9) | it damps 92% of the time [SL r10] |
 | The 8-tick rhythm will erase a relay ring (Fable, v27 plan) | it does not; Argon predicted this [v27] |
 | A relay "gets tired" under sustained activity (a NotebookLM summary, Nov 12) | under pulses every 4 to 32 ticks it answers every pulse for 600 ticks and never leaves damping; under a held push it becomes the 59-tick clock or stays silent. No fatigue [noble N2 for pulses every 16 to 70 ticks; every 4 to 12 ticks in an unarchived Opus run] |
+| A shared slow state will win when every channel changes a little at once (Opus, Z round) | it adapted more slowly than per-channel states (21.6 vs 12.4 laps) and lost in 4 of 5 seeds [noble] Z |
 | The −5.5 hole and the post-beat wake will break multi-beat patterns (Argon) | at a good weight they do not: 40 of 40 random patterns for 1,000 laps. The real limits are runs of 49 or more 1s, and noise [v27] |
 
 ## 6. Open
@@ -115,7 +119,9 @@ files are in GeometricNeuronOriginReview, not here. Check them before claiming a
   it so far is a timeout that an ordinary timer also does. A network-level slow state, set by many
   units and fed back to them (Sol's Z), was built as an added leaky integrator gating write wires:
   slow surprise-gating helps a lot (0.73 -> 0.92), but a shared Z loses to one Z per channel when
-  dropouts are independent, and a plain counter is nearly as good. Z made of geometric units:
-  not built. [noble] Z
+  dropouts are independent, and a plain counter is nearly as good. In a world built for pooling
+  (every channel changes by one beat) the shared Z still loses and adapts more slowly; used as a
+  boundary condition on per-channel thresholds it ties per-channel Z. A listening relay's own
+  50-tick variance works as Z with nothing added (0.73 -> 0.85), below the leaky Z. [noble] Z
 - Nothing has been tested on a task.
 - Vector length 2,048 (Antti's note) is not modelled: `taps.json` is for 16 samples per row.
