@@ -5,6 +5,7 @@ rounds. It lists what the machine is and what has been measured, with where each
 from. If you are an AI starting a session on this line of repos, read it first and add to it.
 
 Marks: **[v27]** measured in this repo (`experiments/v27.py`, `results/v27.json`).
+**[noble]** measured in this repo (`experiments/noble_n1_n2.py`, `experiments/noble_n3.py`, `results/noble.json`).
 **[SL r*n*]** reported in round *n* of GeometricNeuronSurfaceListener and not re-run here.
 **[code]** read from code.
 
@@ -43,6 +44,7 @@ files are in GeometricNeuronOriginReview, not here. Check them before claiming a
 | Constant | Behaviour | Source |
 |---|---|---|
 | 1.0 (original) | beats by itself every 59 ticks: a clock | [v27] `clock.clock_intervals`; [SL r9] |
+| **1.1** | **relays every 2-tick pulse (0 extra beats) while driven faster than ~59 ticks, and beats by itself 64 ticks after input stops, then every 59/60**: relay and watchdog in one unit | [noble] N2 |
 | 1.35 | still a clock, about 58 ticks | [SL r9] |
 | 1.40 | every second beat missed | [SL r9] |
 | 1.45 | no large beats; damps 92% of the time | [SL r9, r10] |
@@ -74,6 +76,15 @@ files are in GeometricNeuronOriginReview, not here. Check them before claiming a
 - **The clock's beat on the wires** is two ticks of 1.59 and 1.94, then two ticks of 0.56
   four ticks later.
 
+- **Two levels** [noble]. `var` is a slow whole-unit variable that gates the fast pipeline. Hold it
+  at 0.5 or 0.0 and the clock stops; hold it at exactly 0.1 and the unit oscillates every 8 ticks;
+  play back its own recorded `var` and the 59-tick beats return, at times set by the recording even
+  if the fast state is replaced by random values. Phase lives in `var`, not in the pipeline.
+- **Beat traffic clamps `var` high.** Under pulses every 4 to 32 ticks (unarchived Opus run) a relay's `var` stays at 0.5 to
+  2.2, so every relay/XOR/ring result used one level only. This is why the window neuron matched.
+- **The native watchdog counts sub-beat activity.** Sub-threshold wire blips (−2.6 on the setpoint)
+  can abort an escape and delay it from 63 to 141 ticks. A beat-counting timer would not. [noble] N3
+
 ## 5. Things that were believed and turned out wrong
 
 | Belief | What happened |
@@ -82,6 +93,7 @@ files are in GeometricNeuronOriginReview, not here. Check them before claiming a
 | There is no way to make a unit beat through an input (Fable, rounds 1 to 7) | `setpoint_mod` does it [SL r8] |
 | At constant 1.45 the unit never leaves damping (Fable, r9) | it damps 92% of the time [SL r10] |
 | The 8-tick rhythm will erase a relay ring (Fable, v27 plan) | it does not; Argon predicted this [v27] |
+| A relay "gets tired" under sustained activity (a NotebookLM summary, Nov 12) | under pulses every 4 to 32 ticks it answers every pulse for 600 ticks and never leaves damping; under a held push it becomes the 59-tick clock or stays silent. No fatigue [noble N2 for pulses every 16 to 70 ticks; every 4 to 12 ticks in an unarchived Opus run] |
 | The −5.5 hole and the post-beat wake will break multi-beat patterns (Argon) | at a good weight they do not: 40 of 40 random patterns for 1,000 laps. The real limits are runs of 49 or more 1s, and noise [v27] |
 
 ## 6. Open
@@ -89,5 +101,8 @@ files are in GeometricNeuronOriginReview, not here. Check them before claiming a
 - Two-way wiring still runs away. A self-cable helps at one weight and one length only. [v27]
 - Why a clock one tick off a loop's lap refills erased slots with 1s. [v27], not diagnosed
 - Nothing here learns. Every weight, length and constant is set by hand.
+- The slow level does real causal work (the clock lives in it), but the only function found for
+  it so far is a timeout that an ordinary timer also does. A network-level slow state, set by many
+  units and fed back to them (Sol's Z), is not built. [noble]
 - Nothing has been tested on a task.
 - Vector length 2,048 (Antti's note) is not modelled: `taps.json` is for 16 samples per row.

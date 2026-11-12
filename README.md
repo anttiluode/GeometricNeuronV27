@@ -134,6 +134,99 @@ round it and most slots behind the gap are refilled with 1s. I did not diagnose 
 It works at one weight and one length, it is not monotone, and with a clock at the end of the
 chain the self-cable breaks the clock (10 beats in 100 periods). Sol's warning stands.
 
+## Noble round: two levels (Opus 5.5, Nov 12, on Sol's design)
+
+After the one-wire XOR and self-writing rings (GN-XOR, KultaaVaiKatinkultaaOpus, GoldOpus), an
+abstract window neuron with no checkerboard and no slow state reproduced every result. Denis
+Noble's "A theory of biological relativity" (Interface Focus 2012) suggested why. In the heart,
+the rhythm sits in no protein. It lives in the loop between a whole-cell variable (voltage) and
+the channels it gates, and clamping the voltage stops every channel oscillation. GN27 has the
+same two levels: the fast pipeline, and `var`, the variance of the last 50 readings, which picks
+damp or amplify for it. Every task so far kept `var` high with its own traffic (0.5 to 2.2), so
+those tests used one level only.
+
+Run: `python experiments/noble_n1_n2.py` and `python experiments/noble_n3.py` (under a minute
+together). Numbers in `results/noble.json`, checks in `tests/test_noble.py`. `gn27.py` is unchanged;
+the clamp lives in `ClampNet`, which is tested equal to `Net` tick for tick when nothing is clamped.
+
+**N1. Clamp the slow variable of the clock (constant 1.0), from tick 300.**
+
+| Condition | Beats after tick 300 |
+|---|---|
+| free | every 59 ticks |
+| `var` held at 0.5 (damp) | **none** |
+| `var` held at 0.0 (amplify) | **none** |
+| `var` held at exactly 0.1 | a different oscillator: every 8 ticks |
+| its own recorded `var` played back, loop cut | every 59 ticks, one tick late |
+| the recording shifted 20 ticks | every beat 20 ticks earlier |
+| own recording played back, fast state replaced by random values at the clamp | **identical beats** to the unscrambled playback, 5 of 5 seeds |
+| free running, fast state replaced by random values | same beat times (4 of 5 seeds; one 1 tick off) |
+
+This is Noble's voltage clamp, and the playback rows are the lab's action-potential clamp. Sol
+asked whether a replayed trace only *supplies* timing or whether the timing is really held there.
+The scrambled rows answer it for this unit: the fast state forgets within one beat, and the beat
+times follow the slow trace whatever the fast state was.
+
+**N2. Can one unit both relay and escape?** (Sol's point: 1.6 relays, 1.0 is a clock, and
+nothing had shown one setting doing both.) 2-tick pulses every P ticks for 600 ticks, then nothing.
+
+| Constant | Pulses answered once, 3 to 6 ticks later (P = 16 / 32 / 48) | Extra beats while driven | First own beat after input stops |
+|---|---|---|---|
+| 1.0 | 0.97 / 0.94 / 0.92 | 1 | 64 ticks |
+| **1.1** | **1.00 / 1.00 / 1.00** | **0** | **64 ticks** |
+| 1.3, 1.35 | 1.00 | 1 | 64 ticks |
+| 1.4 | 1.00 | 0 | 122 ticks |
+| 1.45, 1.5, 1.6 | 1.00 | 0 | never |
+| window neuron | 1.00 | 0 | never |
+
+At 1.1 one unchanged unit is a perfect relay while driven faster than about once per 59 ticks,
+and a pacemaker when the input stops. Driven slower (P = 70) it escapes between pulses, as a
+pacemaker should. The window neuron can never escape: it has nothing slow.
+
+**N3. Sol's four situations.** A world relay, the one-wire self-writing 8-ring, its XOR comparator
+(all 1.6), and two watchdogs at 1.1: one listening to the ring, one to the world. 20 laps per phase.
+Variant **hold**: write-back off in P2 and P3, ring erased by hand (+12 for one lap) at P3.
+
+| Phase | Comparator | Ring watchdog escapes | World watchdog escapes |
+|---|---|---|---|
+| P1 world and ring agree | 4 beats while learning, then silent | 0 (relays 100% of ring beats) | 0 (relays 100% of world beats) |
+| P2 world silent, ring still going | **59 beats: every expected beat** | **0: fooled by the ring's own traffic** | 10 |
+| P3 everything silent | 1 | 9 | 11 |
+| P4 a new world pattern | silent after 2 laps; ring then matches world | 1 | 0 |
+
+Variant **learning** (write-back always on): when the world stops, the ring erases itself within one
+lap (the comparator fires 3 times), and then both watchdogs escape (10 each in P2). The new
+pattern in P4 is held after 2 laps.
+
+So the network does tell its own activity from the world's, but not with the slow state. The
+signature of "my memory is talking and the world is not" is the fast comparator firing at every
+expected beat. A watchdog fed by the ring is fooled by exactly that self-generated traffic, as Sol
+predicted. One fed by the world is not. Three readouts from one unit type separate the situations:
+
+| comparator | ring watchdog | world watchdog | meaning |
+|---|---|---|---|
+| quiet | relaying | relaying | world and memory agree |
+| busy | relaying | escaping | world gone, memory still running |
+| quiet | escaping | escaping | everything silent |
+
+**Against an ordinary timer.** A software watchdog (fire 63 ticks after the last input, then every
+59.5) matches the native escape beats within 3 ticks in 21 of 21 cases in every stream but one:
+after the hand erase, the ring watchdog escaped 141 ticks after the last beat instead of 63. Cause,
+traced tick by tick: the erase lap made ring unit 1 send sub-beat wire blips (−2.6 on the
+watchdog's setpoint) for 30 ticks. They did not make it beat, but they disturbed its 50-tick history,
+and its first escape attempt (variance crossing 0.1 at tick 1358) aborted. A beat-counting timer
+ignores such blips; the native watchdog counts any disturbance as "something happened".
+
+**Verdict.** The second level is real and causal: clamp it and the rhythm dies, play it back and the
+rhythm follows it whatever the fast state is. It gives GN27 its first ability the window neuron
+lacks: one unchanged unit at constant 1.1 that relays and escapes. But what that ability computes
+here is a timeout, and an ordinary timer does the same except where sub-threshold traffic delays
+the native one. Telling memory from world needed the fast comparator, not the slow variable. Not
+claimed: that the slow state does anything a timer cannot; a heart model (overdrive suppression in
+real tissue has mechanisms GN27 lacks); any learning in the slow level. Sol's next step (a shared
+network-level slow state Z set by many units, compared against clamped, replayed and simple-controller
+versions) is not built.
+
 ## What the unit contributes
 
 - **Regeneration.** A passive cable fades; a relay puts the beat back at full size each pass.
@@ -141,6 +234,8 @@ chain the self-cable breaks the clock (10 beats in 100 periods). Sol's warning s
 - **Band-pass excitation**, which turns attenuation into distance selection.
 - **A built-in limit** from its 50-tick variance memory: no run of 49 identical ticks.
 - **A clock from the same unit** at another constant, which gates by period.
+- **A second, slow level** (the 50-tick variance) that holds the clock's phase, and at constant 1.1
+  turns one unit into relay and watchdog at once. The window neuron has no equivalent.
 
 ## What is not shown
 
@@ -155,7 +250,9 @@ chain the self-cable breaks the clock (10 beats in 100 periods). Sol's warning s
 | File | What |
 |---|---|
 | `gn27.py` | the simulator: round ten's `native.py` plus edge length and attenuation |
-| `experiments/v27.py`, `results/v27.json` | every number above |
+| `experiments/v27.py`, `results/v27.json` | every number in results 1 to 10 |
+| `experiments/noble_n1_n2.py`, `experiments/noble_n3.py`, `results/noble.json` | the Noble round |
+| `experiments/window.py` | the control neuron, copied from KultaaVaiKatinkultaaOpus |
 | `v27.js`, `index.html` | the page; same machine as the Python, checked tick for tick |
 | `tests/` | `python -m unittest discover -s tests` and `node tests/js_parity.cjs` |
 | `taps.json`, `taps.js` | the checkerboard samples from the archived Perception Lab nodes |
