@@ -1134,5 +1134,462 @@
     ]
    }
   }
+ },
+ "Z_shared_slow_state": {
+  "patterns_held_alone_without_dropouts": "38 of 38",
+  "tuned": {
+   "local": {
+    "theta": 2.5
+   },
+   "shared": {
+    "theta": 7.0
+   },
+   "software": {
+    "m": 2,
+    "k": 2
+   }
+  },
+  "p_drop": 0.1,
+  "seeds": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ],
+  "per_seed": {
+   "1": {
+    "always": {
+     "correct": 0.7477272727272727,
+     "correct_before_switch": 0.725,
+     "adapt_all_switch_laps": 30,
+     "adapt_one_switch_laps": 8,
+     "writes": 229,
+     "gate_open_frac": 1.0
+    },
+    "hold": {
+     "correct": 0.45454545454545453,
+     "correct_before_switch": 1.0,
+     "adapt_all_switch_laps": null,
+     "adapt_one_switch_laps": null,
+     "writes": 13,
+     "gate_open_frac": 0.154
+    },
+    "local Z": {
+     "correct": 0.9454545454545454,
+     "correct_before_switch": 0.9666666666666667,
+     "adapt_all_switch_laps": 4,
+     "adapt_one_switch_laps": 2,
+     "writes": 77,
+     "gate_open_frac": 0.284
+    },
+    "shared Z": {
+     "correct": 0.9204545454545454,
+     "correct_before_switch": 0.9333333333333333,
+     "adapt_all_switch_laps": 6,
+     "adapt_one_switch_laps": 8,
+     "writes": 94,
+     "gate_open_frac": 0.361
+    },
+    "shared Z clamped": {
+     "correct": 0.45454545454545453,
+     "correct_before_switch": 1.0,
+     "adapt_all_switch_laps": null,
+     "adapt_one_switch_laps": null,
+     "writes": 13,
+     "gate_open_frac": 0.154
+    },
+    "shared Z replayed (+20 laps)": {
+     "correct": 0.7840909090909091,
+     "correct_before_switch": 1.0,
+     "adapt_all_switch_laps": 26,
+     "adapt_one_switch_laps": 23,
+     "writes": 81,
+     "gate_open_frac": 0.374
+    },
+    "software counter": {
+     "correct": 0.9227272727272727,
+     "correct_before_switch": 0.95,
+     "adapt_all_switch_laps": 6,
+     "adapt_one_switch_laps": 6,
+     "writes": 112,
+     "gate_open_frac": 0.356
+    }
+   },
+   "2": {
+    "always": {
+     "correct": 0.7863636363636364,
+     "correct_before_switch": 0.7333333333333333,
+     "adapt_all_switch_laps": 4,
+     "adapt_one_switch_laps": 7,
+     "writes": 180,
+     "gate_open_frac": 1.0
+    },
+    "hold": {
+     "correct": 0.2727272727272727,
+     "correct_before_switch": 1.0,
+     "adapt_all_switch_laps": null,
+     "adapt_one_switch_laps": null,
+     "writes": 11,
+     "gate_open_frac": 0.154
+    },
+    "local Z": {
+     "correct": 0.9454545454545454,
+     "correct_before_switch": 0.9916666666666667,
+     "adapt_all_switch_laps": 10,
+     "adapt_one_switch_laps": 7,
+     "writes": 46,
+     "gate_open_frac": 0.237
+    },
+    "shared Z": {
+     "correct": 0.9454545454545454,
+     "correct_before_switch": 1.0,
+     "adapt_all_switch_laps": 4,
+     "adapt_one_switch_laps": 14,
+     "writes": 31,
+     "gate_open_frac": 0.215
+    },
+    "shared Z clamped": {
+     "correct": 0.2727272727272727,
+     "correct_before_switch": 1.0,
+     "adapt_all_switch_laps": null,
+     "adapt_one_switch_laps": null,
+     "writes": 11,
+     "gate_open_frac": 0.154
+    },
+    "shared Z replayed (+20 laps)": {
+     "correct": 0.6022727272727273,
+     "correct_before_switch": 0.9916666666666667,
+     "adapt_all_switch_laps": null,
+     "adapt_one_switch_laps": 34,
+     "writes": 37,
+     "gate_open_frac": 0.223
+    },
+    "software counter": {
+     "correct": 0.9386363636363636,
+     "correct_before_switch": 0.975,
+     "adapt_all_switch_laps": 4,
+     "adapt_one_switch_laps": 7,
+     "writes": 73,
+     "gate_open_frac": 0.312
+    }
+   },
+   "3": {
+    "always": {
+     "correct": 0.7272727272727273,
+     "correct_before_switch": 0.875,
+     "adapt_all_switch_laps": 64,
+     "adapt_one_switch_laps": 1,
+     "writes": 255,
+     "gate_open_frac": 1.0
+    },
+    "hold": {
+     "correct": 0.2727272727272727,
+     "correct_before_switch": 1.0,
+     "adapt_all_switch_laps": null,
+     "adapt_one_switch_laps": null,
+     "writes": 10,
+     "gate_open_frac": 0.154
+    },
+    "local Z": {
+     "correct": 0.9068181818181819,
+     "correct_before_switch": 1.0,
+     "adapt_all_switch_laps": 20,
+     "adapt_one_switch_laps": 5,
+     "writes": 104,
+     "gate_open_frac": 0.338
+    },
+    "shared Z": {
+     "correct": 0.8068181818181818,
+     "correct_before_switch": 1.0,
+     "adapt_all_switch_laps": 12,
+     "adapt_one_switch_laps": 1,
+     "writes": 187,
+     "gate_open_frac": 0.591
+    },
+    "shared Z clamped": {
+     "correct": 0.2727272727272727,
+     "correct_before_switch": 1.0,
+     "adapt_all_switch_laps": null,
+     "adapt_one_switch_laps": null,
+     "writes": 10,
+     "gate_open_frac": 0.154
+    },
+    "shared Z replayed (+20 laps)": {
+     "correct": 0.5795454545454546,
+     "correct_before_switch": 0.7666666666666667,
+     "adapt_all_switch_laps": 64,
+     "adapt_one_switch_laps": 1,
+     "writes": 143,
+     "gate_open_frac": 0.561
+    },
+    "software counter": {
+     "correct": 0.884090909090909,
+     "correct_before_switch": 1.0,
+     "adapt_all_switch_laps": 20,
+     "adapt_one_switch_laps": 5,
+     "writes": 140,
+     "gate_open_frac": 0.418
+    }
+   },
+   "4": {
+    "always": {
+     "correct": 0.6931818181818182,
+     "correct_before_switch": 0.775,
+     "adapt_all_switch_laps": null,
+     "adapt_one_switch_laps": 8,
+     "writes": 267,
+     "gate_open_frac": 1.0
+    },
+    "hold": {
+     "correct": 0.2727272727272727,
+     "correct_before_switch": 1.0,
+     "adapt_all_switch_laps": null,
+     "adapt_one_switch_laps": null,
+     "writes": 12,
+     "gate_open_frac": 0.154
+    },
+    "local Z": {
+     "correct": 0.8909090909090909,
+     "correct_before_switch": 1.0,
+     "adapt_all_switch_laps": 10,
+     "adapt_one_switch_laps": 8,
+     "writes": 114,
+     "gate_open_frac": 0.366
+    },
+    "shared Z": {
+     "correct": 0.8522727272727273,
+     "correct_before_switch": 1.0,
+     "adapt_all_switch_laps": 11,
+     "adapt_one_switch_laps": 8,
+     "writes": 142,
+     "gate_open_frac": 0.506
+    },
+    "shared Z clamped": {
+     "correct": 0.2727272727272727,
+     "correct_before_switch": 1.0,
+     "adapt_all_switch_laps": null,
+     "adapt_one_switch_laps": null,
+     "writes": 12,
+     "gate_open_frac": 0.154
+    },
+    "shared Z replayed (+20 laps)": {
+     "correct": 0.65,
+     "correct_before_switch": 1.0,
+     "adapt_all_switch_laps": 31,
+     "adapt_one_switch_laps": 8,
+     "writes": 122,
+     "gate_open_frac": 0.517
+    },
+    "software counter": {
+     "correct": 0.8545454545454545,
+     "correct_before_switch": 0.975,
+     "adapt_all_switch_laps": 28,
+     "adapt_one_switch_laps": 8,
+     "writes": 166,
+     "gate_open_frac": 0.449
+    }
+   },
+   "5": {
+    "always": {
+     "correct": 0.6909090909090909,
+     "correct_before_switch": 0.7083333333333334,
+     "adapt_all_switch_laps": 79,
+     "adapt_one_switch_laps": 8,
+     "writes": 278,
+     "gate_open_frac": 1.0
+    },
+    "hold": {
+     "correct": 0.2727272727272727,
+     "correct_before_switch": 1.0,
+     "adapt_all_switch_laps": null,
+     "adapt_one_switch_laps": null,
+     "writes": 13,
+     "gate_open_frac": 0.154
+    },
+    "local Z": {
+     "correct": 0.8977272727272727,
+     "correct_before_switch": 0.9583333333333334,
+     "adapt_all_switch_laps": 7,
+     "adapt_one_switch_laps": 5,
+     "writes": 116,
+     "gate_open_frac": 0.387
+    },
+    "shared Z": {
+     "correct": 0.8727272727272727,
+     "correct_before_switch": 1.0,
+     "adapt_all_switch_laps": 7,
+     "adapt_one_switch_laps": 8,
+     "writes": 124,
+     "gate_open_frac": 0.481
+    },
+    "shared Z clamped": {
+     "correct": 0.2727272727272727,
+     "correct_before_switch": 1.0,
+     "adapt_all_switch_laps": null,
+     "adapt_one_switch_laps": null,
+     "writes": 13,
+     "gate_open_frac": 0.154
+    },
+    "shared Z replayed (+20 laps)": {
+     "correct": 0.5545454545454546,
+     "correct_before_switch": 0.75,
+     "adapt_all_switch_laps": 34,
+     "adapt_one_switch_laps": 8,
+     "writes": 148,
+     "gate_open_frac": 0.495
+    },
+    "software counter": {
+     "correct": 0.8681818181818182,
+     "correct_before_switch": 0.925,
+     "adapt_all_switch_laps": 7,
+     "adapt_one_switch_laps": 8,
+     "writes": 167,
+     "gate_open_frac": 0.475
+    }
+   }
+  },
+  "mean": {
+   "always": {
+    "correct": 0.729,
+    "correct_before_switch": 0.763,
+    "adapt_all_switch_laps": [
+     30,
+     4,
+     64,
+     null,
+     79
+    ],
+    "adapt_one_switch_laps": [
+     8,
+     7,
+     1,
+     8,
+     8
+    ],
+    "writes": 241.8,
+    "gate_open_frac": 1.0
+   },
+   "hold": {
+    "correct": 0.309,
+    "correct_before_switch": 1.0,
+    "adapt_all_switch_laps": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "adapt_one_switch_laps": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "writes": 11.8,
+    "gate_open_frac": 0.154
+   },
+   "local Z": {
+    "correct": 0.917,
+    "correct_before_switch": 0.983,
+    "adapt_all_switch_laps": [
+     4,
+     10,
+     20,
+     10,
+     7
+    ],
+    "adapt_one_switch_laps": [
+     2,
+     7,
+     5,
+     8,
+     5
+    ],
+    "writes": 91.4,
+    "gate_open_frac": 0.322
+   },
+   "shared Z": {
+    "correct": 0.88,
+    "correct_before_switch": 0.987,
+    "adapt_all_switch_laps": [
+     6,
+     4,
+     12,
+     11,
+     7
+    ],
+    "adapt_one_switch_laps": [
+     8,
+     14,
+     1,
+     8,
+     8
+    ],
+    "writes": 115.6,
+    "gate_open_frac": 0.431
+   },
+   "shared Z clamped": {
+    "correct": 0.309,
+    "correct_before_switch": 1.0,
+    "adapt_all_switch_laps": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "adapt_one_switch_laps": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "writes": 11.8,
+    "gate_open_frac": 0.154
+   },
+   "shared Z replayed (+20 laps)": {
+    "correct": 0.634,
+    "correct_before_switch": 0.902,
+    "adapt_all_switch_laps": [
+     26,
+     null,
+     64,
+     31,
+     34
+    ],
+    "adapt_one_switch_laps": [
+     23,
+     34,
+     1,
+     8,
+     8
+    ],
+    "writes": 106.2,
+    "gate_open_frac": 0.434
+   },
+   "software counter": {
+    "correct": 0.894,
+    "correct_before_switch": 0.965,
+    "adapt_all_switch_laps": [
+     6,
+     4,
+     20,
+     28,
+     7
+    ],
+    "adapt_one_switch_laps": [
+     6,
+     7,
+     5,
+     8,
+     8
+    ],
+    "writes": 131.6,
+    "gate_open_frac": 0.402
+   }
+  }
  }
 }

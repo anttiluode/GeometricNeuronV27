@@ -85,6 +85,16 @@ files are in GeometricNeuronOriginReview, not here. Check them before claiming a
 - **The native watchdog counts sub-beat activity.** Sub-threshold wire blips (−2.6 on the setpoint)
   can abort an escape and delay it from 63 to 141 ticks. A beat-counting timer would not. [noble] N3
 
+- **A held setpoint offset is not an off switch.** +1 to +12 held on a comparator's setpoint still
+  lets it fire, at shifted times, and a ring it writes to is lost within a lap. To gate a wire,
+  change the wire's weight. [noble] Z
+- **An extra relay in a write path is not neutral.** Comparator -> relay -> ring unit 4 drops a beat
+  every third lap for the 8 two-beat patterns with 3- and 5-slot gaps; the direct comparator ->
+  unit 3 wire holds all 38 patterns of 2 to 4 non-adjacent beats. [noble] Z
+- **Write-back always on is fragile to dropouts**: with 10% of world beats dropped, an 8-ring holds
+  the clean pattern in about 76% of laps, and one dropout can cascade for several laps. Gating the
+  write wire by a per-channel leaky count of surprise raises it to 98%. [noble] Z
+
 ## 5. Things that were believed and turned out wrong
 
 | Belief | What happened |
@@ -103,6 +113,9 @@ files are in GeometricNeuronOriginReview, not here. Check them before claiming a
 - Nothing here learns. Every weight, length and constant is set by hand.
 - The slow level does real causal work (the clock lives in it), but the only function found for
   it so far is a timeout that an ordinary timer also does. A network-level slow state, set by many
-  units and fed back to them (Sol's Z), is not built. [noble]
+  units and fed back to them (Sol's Z), was built as an added leaky integrator gating write wires:
+  slow surprise-gating helps a lot (0.73 -> 0.92), but a shared Z loses to one Z per channel when
+  dropouts are independent, and a plain counter is nearly as good. Z made of geometric units:
+  not built. [noble] Z
 - Nothing has been tested on a task.
 - Vector length 2,048 (Antti's note) is not modelled: `taps.json` is for 16 samples per row.

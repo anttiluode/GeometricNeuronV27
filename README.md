@@ -146,7 +146,7 @@ damp or amplify for it. Every task so far kept `var` high with its own traffic (
 those tests used one level only.
 
 Run: `python experiments/noble_n1_n2.py` and `python experiments/noble_n3.py` (under a minute
-together). Numbers in `results/noble.json`, checks in `tests/test_noble.py`. `gn27.py` is unchanged;
+together), and `python experiments/noble_z.py` for Z below. Numbers in `results/noble.json`, checks in `tests/test_noble.py`. `gn27.py` is unchanged;
 the clamp lives in `ClampNet`, which is tested equal to `Net` tick for tick when nothing is clamped.
 
 **N1. Clamp the slow variable of the clock (constant 1.0), from tick 300.**
@@ -227,6 +227,64 @@ real tissue has mechanisms GN27 lacks); any learning in the slow level. Sol's ne
 network-level slow state Z set by many units, compared against clamped, replayed and simple-controller
 versions) is not built.
 
+### Z: a shared slow state (Sol's next step)
+
+Run: `python experiments/noble_z.py` (about 35 seconds). Numbers in `results/noble.json` under
+`Z_shared_slow_state`.
+
+**The problem it addresses, from N3.** A self-writing ring with write-back always on erases a slot
+every time the world drops a beat, and replays the glitch for a lap or more. With write-back off it
+keeps everything but never adapts. Sol's proposal: a slow state Z, set by many units and fed back to
+them, should open the write gate only when surprise persists.
+
+**Setup.** Four channels (think four instruments), each the N3 circuit: world relay, 8-relay ring,
+XOR comparator wired to ring unit 3. Every unit is the unchanged gn27 unit at 1.6. Z is not a
+geometric unit; it is a leaky count of comparator beats, `Z ← Z (1 − 1/τ) + beats`, τ = 3 laps.
+Z acts on one synapse per channel: the comparator-to-ring wire is −6 while Z is above θ and 0
+otherwise. World: each channel's pattern is drawn from all 38 patterns of 2 to 4 non-adjacent
+beats in 8 slots (all 38 are held by the ring alone without dropouts). From lap 20, each beat is
+dropped with probability 0.1. At lap 50 all four channels switch to new patterns; at lap 90 one
+channel switches. Score: fraction of (channel, lap) over laps 20 to 129 in which the ring holds the
+world's clean pattern. θ is tuned on seed 0; scores are means over seeds 1 to 5.
+
+| Gate | Correct | Correct before lap 50 | Laps to adapt: all switch / one switch (mean) | Gated writes |
+|---|---|---|---|---|
+| always open | 0.729 | 0.763 | 44 (one seed never) / 6.4 | 242 |
+| closed after lap 20 | 0.309 | **1.000** | never / never | 12 |
+| **one Z per channel** (θ = 2.5) | **0.917** | 0.983 | 10.2 / **5.4** | 91 |
+| one shared Z (θ = 7) | 0.880 | 0.987 | **8.0** / 7.8 | 116 |
+| shared Z clamped at its own mean | 0.309 | 1.000 | never / never | 12 |
+| shared Z, own trace replayed 20 laps late | 0.634 | 0.902 | 39 (one seed never) / 15 | 106 |
+| plain counter per channel (gate open if the comparator fired in 2 of the last 2 laps) | 0.894 | 0.965 | 13.0 / 6.8 | 132 |
+
+Per seed, one Z per channel beats the shared Z (or ties it) in 5 of 5 seeds and the counter in 5 of 5.
+
+**What this shows.**
+- A slow state that integrates surprise does real work here. It takes memory from 0.73 to 0.92
+  correct: it ignores dropouts nearly as well as a frozen ring and still follows real changes.
+- It passes Noble's controls. Clamped at its mean, the gate never opens (as good as frozen). Its own
+  trace replayed 20 laps late is worse than no gate at all. The benefit needs Z driven by the
+  system's own surprise, at the time it happens.
+- **The shared Z did not earn its place.** Dropouts here are independent per channel, so pooling
+  them adds noise: the shared gate opens more often and writes more corrections. Its one advantage
+  is faster adaptation when all channels change together (8.0 vs 10.2 laps, not in every seed). It
+  is slower when one channel changes alone. This is the same trade-off PhaseLockedPredictiveCoding
+  found for its shared phase: sharing helps when changes are global and hurts when they are local.
+- A leaky per-channel Z is slightly better than a plain counter (0.917 vs 0.894, 5 of 5 seeds).
+  That is a small difference between two ordinary controllers, not a property of the geometry.
+- Z is an added leaky integrator. Whether the units' own 50-tick variance could play Z's part was
+  not tested.
+
+**Two gates that failed** (kept in the experiment's docstring): a gate relay between comparator and
+ring made the 8 two-beat patterns with gaps of 3 and 5 slots drop a beat every third lap. A held
+setpoint offset (+1 to +12) on the comparator does not switch it off cleanly; it still fires at
+shifted times and the ring is lost within a lap.
+
+Not claimed: a new mechanism (gating learning by accumulated surprise is ordinary; it is how many
+adaptive filters and learning-rate schedules work), or that the shared state helps in general. Not
+tested: correlated dropouts, global changes that move only one beat per channel (where pooling
+should help most), and Z built from geometric units.
+
 ## What the unit contributes
 
 - **Regeneration.** A passive cable fades; a relay puts the beat back at full size each pass.
@@ -251,7 +309,7 @@ versions) is not built.
 |---|---|
 | `gn27.py` | the simulator: round ten's `native.py` plus edge length and attenuation |
 | `experiments/v27.py`, `results/v27.json` | every number in results 1 to 10 |
-| `experiments/noble_n1_n2.py`, `experiments/noble_n3.py`, `results/noble.json` | the Noble round |
+| `experiments/noble_n1_n2.py`, `experiments/noble_n3.py`, `experiments/noble_z.py`, `results/noble.json` | the Noble round and the shared slow state Z |
 | `experiments/window.py` | the control neuron, copied from KultaaVaiKatinkultaaOpus |
 | `v27.js`, `index.html` | the page; same machine as the Python, checked tick for tick |
 | `tests/` | `python -m unittest discover -s tests` and `node tests/js_parity.cjs` |

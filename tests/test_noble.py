@@ -10,6 +10,7 @@ sys.path[:0] = [str(ROOT), str(ROOT / "experiments")]
 import gn27 as g                      # noqa: E402
 import noble_n1_n2 as n12             # noqa: E402
 import noble_n3 as n3                 # noqa: E402
+import noble_z as nz                  # noqa: E402
 
 
 class Clamp(unittest.TestCase):
@@ -57,6 +58,19 @@ class FourSituations(unittest.TestCase):
         self.assertEqual(r["escape_beats_per_phase"]["world_watchdog"][P2], 10)     # world is silent
         self.assertGreater(r["escape_beats_per_phase"]["ring_watchdog"][2], 5)      # everything silent
         self.assertTrue(r["P4_ring_matches_world_last_lap"])
+
+
+class SharedSlowState(unittest.TestCase):
+    def test_surprise_gate_beats_both_extremes_and_dies_when_clamped(self):
+        sd = 1
+        always = nz.score(nz.run(sd, "always"))["correct"]
+        hold = nz.score(nz.run(sd, "hold"))["correct"]
+        local = nz.score(nz.run(sd, "local", theta=2.5))["correct"]
+        free = nz.run(sd, "shared", theta=7.0)
+        clamped = nz.score(nz.run(sd, "clamped", theta=7.0, ztrace=float(free["zs"].mean())))["correct"]
+        self.assertGreater(local, always + 0.1)
+        self.assertGreater(local, hold + 0.3)
+        self.assertEqual(clamped, hold)
 
 
 if __name__ == "__main__":
